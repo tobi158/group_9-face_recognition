@@ -153,7 +153,7 @@ def detect_faces(path, model_path="face_data.pkl", resize_scale=0.5, tolerance=0
 def main():
     print("🚀 Bắt đầu chương trình nhận diện khuôn mặt...")
     dataset_folder = r"C:\Users\BHXH\Desktop\venv_demo\huanLuyen"
-    test_path = r"C:\Users\BHXH\Desktop\venv_demo\video.mp4"
+    test_path = r"C:\Users\BHXH\Desktop\venv_demo\anh1.jpeg"
 
     build_face_dataset(dataset_folder=dataset_folder, output_file="face_data.pkl")
     detect_faces(path=test_path, model_path="face_data.pkl", display=True)
