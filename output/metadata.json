@@ -1,12 +1,12 @@
 {
-  "file": "C:\\Users\\BHXH\\Desktop\\venv_demo\\anh1.jpeg",
+  "file": "C:\\Users\\BHXH\\Desktop\\venv_demo\\lfw-funneled\\lfw_funneled\\Abdoulaye_Wade\\Abdoulaye_Wade_0001.jpg",
   "faces": [
     {
-      "name": "hoa",
-      "top": 22,
-      "right": 186,
-      "bottom": 136,
-      "left": 72
+      "name": "Abdoulaye_Wade",
+      "top": 60,
+      "right": 196,
+      "bottom": 198,
+      "left": 60
     }
   ],
   "total": 1
