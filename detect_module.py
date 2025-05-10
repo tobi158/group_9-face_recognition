@@ -94,7 +94,7 @@ def build_face_dataset(dataset_folder="dataset", output_file="face_data.pkl"):
     known_encodings, known_names = [], []
     total_images, success_count, fail_count = 0, 0, 0
 
- for person_dir in dataset_path.iterdir():
+    for person_dir in dataset_path.iterdir():
         if person_dir.is_dir():
             for filename in os.listdir(person_dir):
                 if filename.lower().endswith(('.jpg', '.jpeg', '.png')):
