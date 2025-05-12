@@ -37,13 +37,19 @@ def process_writeFile(img, rgb, encs, locs, known_encodings_temp, known_names_te
                 distances = face_recognition.face_distance(known_encodings_temp, enc)
                 if distances.min() < tolerance_temp:
                     idx = distances.argmin()
+                    min_distance = distances.min()
                     name = known_names_temp[idx]
+                    # Độ tin cậy có thể quy đổi bằng 1 - normalized_distance
+                    confidence = (1.0 - min_distance) * 100  # chuyển sang phần trăm
+                    label = f"{name} ({confidence:.2f}%)"
+                else:
+                    label = name  # vẫn là "Unknown"
             if name != "Unknown" and name not in spoken_temp:
                 engine_temp.say(f"Xin chào {name}")
                 engine_temp.runAndWait()
                 spoken_temp.add(name)
             cv2.rectangle(img, (left, top), (right, bottom), (0, 255, 0), 2)
-            cv2.putText(img, name, (left, top - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (255, 0, 0), 2)
+            cv2.putText(img, label, (left, top - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (255, 0, 0), 2)
             face_crop = rgb[top:bottom, left:right]
             start_index += 1
             cv2.imwrite(f"output/faces/{name}_{start_index}.jpg", cv2.cvtColor(face_crop, cv2.COLOR_RGB2BGR))
@@ -112,7 +118,7 @@ def build_face_dataset(dataset_folder="dataset", output_file="face_data.pkl"):
         with open(output_file, "wb") as f:
             pickle.dump({"encodings": known_encodings, "names": known_names}, f)
         print(f"\n✅ Đã lưu dữ liệu vào {output_file}")
-        # print(f"📦 Tổng ảnh: {total_images} | ✅ Thành công: {success_count} | ❌ Thất bại: {fail_count}")
+        print(f"📦 Tổng ảnh: {total_images} | ✅ Thành công: {success_count} | ❌ Thất bại: {fail_count}")
     else:
         print("⚠️ Không tìm thấy khuôn mặt nào để lưu.")
 
@@ -214,6 +220,7 @@ def main():
 
     build_face_dataset(dataset_folder=dataset_folder, output_file="face_data.pkl")
     detect_faces(path=test_path, model_path="face_data.pkl", display=True)
+    
 
 if __name__ == "__main__":
     main()

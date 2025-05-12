@@ -23,7 +23,7 @@ def edit_end_encoding(img, resize_scale_temp):
 
 
 
-#hàm so sánh và xác định tên
+#hàm nhận diện và ghi file
 def process_writeFile(img, rgb, encs, locs, known_encodings_temp, known_names_temp, tolerance_temp, is_image_temp, is_video_temp, metadata_temp, engine_temp, spoken_temp):
     total_faces = 0
     frame_id = 0
@@ -37,13 +37,19 @@ def process_writeFile(img, rgb, encs, locs, known_encodings_temp, known_names_te
                 distances = face_recognition.face_distance(known_encodings_temp, enc)
                 if distances.min() < tolerance_temp:
                     idx = distances.argmin()
+                    min_distance = distances.min()
                     name = known_names_temp[idx]
+                    # Độ tin cậy có thể quy đổi bằng 1 - normalized_distance
+                    confidence = (1.0 - min_distance) * 100  # chuyển sang phần trăm
+                    label = f"{name} ({confidence:.2f}%)"
+                else:
+                    label = name  # vẫn là "Unknown"
             if name != "Unknown" and name not in spoken_temp:
                 engine_temp.say(f"Xin chào {name}")
                 engine_temp.runAndWait()
                 spoken_temp.add(name)
             cv2.rectangle(img, (left, top), (right, bottom), (0, 255, 0), 2)
-            cv2.putText(img, name, (left, top - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (255, 0, 0), 2)
+            cv2.putText(img, label, (left- 40, top - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 0), 2)
             face_crop = rgb[top:bottom, left:right]
             start_index += 1
             cv2.imwrite(f"output/faces/{name}_{start_index}.jpg", cv2.cvtColor(face_crop, cv2.COLOR_RGB2BGR))
@@ -56,6 +62,7 @@ def process_writeFile(img, rgb, encs, locs, known_encodings_temp, known_names_te
         return total_faces
     elif is_video_temp:
         return total_faces, frame_id
+
 
 
 
@@ -122,8 +129,8 @@ def build_face_dataset(dataset_folder="dataset", output_file="face_data.pkl"):
     if known_encodings:
         with open(output_file, "wb") as f:
             pickle.dump({"encodings": known_encodings, "names": known_names}, f)
-        print(f"\n✅ Đã lưu dữ liệu vào {output_file}")
-        # print(f"📦 Tổng ảnh: {total_images} | ✅ Thành công: {success_count} | ❌ Thất bại: {fail_count}")
+        print(f"\nĐã lưu dữ liệu vào {output_file}")
+        # print(f"Tổng ảnh: {total_images} | Thành công: {success_count} | Thất bại: {fail_count}")
     else:
         print("⚠️ Không tìm thấy khuôn mặt nào để lưu.")
 
@@ -154,7 +161,7 @@ def detect_faces(path, model_path="face_data.pkl", resize_scale=0.5, tolerance=0
     if is_image:
         img = cv2.imread(path)
         if img is None:
-            print(f"❌ Không đọc được ảnh từ {path}. Kiểm tra lại đường dẫn.")
+            print(f"Không đọc được ảnh từ {path}. Kiểm tra lại đường dẫn.")
             return
         #xử lý và trích xuất đặc trưng ảnh
         encs, locs, rgb = edit_end_encoding(img, resize_scale_temp = resize_scale)
@@ -164,7 +171,7 @@ def detect_faces(path, model_path="face_data.pkl", resize_scale=0.5, tolerance=0
 
             
         cv2.imwrite("output/result_image.jpg", img)
-        print(f"✅ Kết quả lưu tại: output/result_image.jpg. Số khuôn mặt: {total_faces}")
+        print(f"Kết quả lưu tại: output/result_image.jpg. Số khuôn mặt: {total_faces}")
 
         if display:
             cv2.imshow("Result", img)
@@ -174,7 +181,7 @@ def detect_faces(path, model_path="face_data.pkl", resize_scale=0.5, tolerance=0
     elif is_video:
         cap = cv2.VideoCapture(path)
         if not cap.isOpened():
-            print(f"❌ Không mở được video: {path}")
+            print(f"Không mở được video: {path}")
             return
         out = None
         pbar = tqdm(total=int(cap.get(cv2.CAP_PROP_FRAME_COUNT)), desc="Đang phân tích video")

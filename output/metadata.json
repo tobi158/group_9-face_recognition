@@ -1,12 +1,12 @@
 {
-  "file": "C:\\Users\\BHXH\\Desktop\\venv_demo\\lfw-funneled\\lfw_funneled\\Abdoulaye_Wade\\Abdoulaye_Wade_0001.jpg",
+  "file": "C:\\Users\\BHXH\\Desktop\\venv_demo\\lfw-funneled\\lfw_funneled\\Abdel_Nasser_Assidi\\Abdel_Nasser_Assidi_0001.jpg",
   "faces": [
     {
-      "name": "Abdoulaye_Wade",
-      "top": 60,
-      "right": 196,
-      "bottom": 198,
-      "left": 60
+      "name": "Abdel_Nasser_Assidi",
+      "top": 84,
+      "right": 174,
+      "bottom": 178,
+      "left": 78
     }
   ],
   "total": 1
