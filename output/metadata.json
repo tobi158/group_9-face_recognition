@@ -1,12 +1,12 @@
 {
-  "file": "C:\\Users\\BHXH\\Desktop\\venv_demo\\lfw-funneled\\lfw_funneled\\Abdel_Nasser_Assidi\\Abdel_Nasser_Assidi_0001.jpg",
+  "file": "C:\\Users\\BHXH\\Desktop\\venv_demo\\lfw-funneled\\lfw_funneled\\Adolfo_Rodriguez_Saa\\Adolfo_Rodriguez_Saa_0002.jpg",
   "faces": [
     {
-      "name": "Abdel_Nasser_Assidi",
-      "top": 84,
+      "name": "Adolfo_Rodriguez_Saa",
+      "top": 62,
       "right": 174,
-      "bottom": 178,
-      "left": 78
+      "bottom": 176,
+      "left": 60
     }
   ],
   "total": 1
