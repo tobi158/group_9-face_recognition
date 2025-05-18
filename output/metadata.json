@@ -1,12 +1,12 @@
 {
-  "file": "C:\\Users\\BHXH\\Desktop\\venv_demo\\lfw-funneled\\lfw_funneled\\Adolfo_Rodriguez_Saa\\Adolfo_Rodriguez_Saa_0002.jpg",
+  "file": "C:\\Users\\BHXH\\Desktop\\venv_demo\\trum.jpg",
   "faces": [
     {
-      "name": "Adolfo_Rodriguez_Saa",
-      "top": 62,
-      "right": 174,
-      "bottom": 176,
-      "left": 60
+      "name": "Donald_Trump",
+      "top": 138,
+      "right": 272,
+      "bottom": 218,
+      "left": 194
     }
   ],
   "total": 1
