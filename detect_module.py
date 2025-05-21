@@ -8,7 +8,7 @@ import pyttsx3
 import matplotlib.pyplot as plt
 from pathlib import Path
 import random
-from collections import deque, Counter
+import numpy as np
 
 
 # Hàm lấy encoding từ 1 ảnh gốc #
@@ -21,9 +21,6 @@ def edit_end_encoding(img, resize_scale_temp):
     encs_temp = face_recognition.face_encodings(img, locs)
     return encs_temp, locs, rgb
 
-
-# Khởi tạo hàng đợi lưu tên ổn định (global hoặc truyền vào từ ngoài nếu cần giữ trạng thái giữa các khung)
-name_queue = deque(maxlen=3)  # Ghi nhớ 5 tên gần nhất
 
 #hàm nhận diện và ghi file
 def process_writeFile(img, rgb, encs, locs, known_encodings_temp, known_names_temp, tolerance_temp, is_image_temp, is_video_temp, metadata_temp, engine_temp, spoken_temp):
@@ -86,21 +83,47 @@ def process_image(image_path):
     face_locations = face_recognition.face_locations(image)
     if not face_locations:
         print(f"⚠️ Không phát hiện khuôn mặt: {image_path}")
-        return None
+        return None, None
     encodings = face_recognition.face_encodings(image, face_locations)
     if not encodings:
         print(f"⚠️ Không encode được khuôn mặt: {image_path}")
-        return None
-    return encodings[0]
-
+        return None, None
+    return encodings[0], image
 
 
 # Huấn luyện và lưu dữ liệu đã cân bằng lớp #
 
 def build_face_dataset(dataset_folder="dataset", output_file="face_data.pkl", balance_data=True):
+    def augment_image(image):
+        aug_images = []
+
+        # Lật ngang
+        flip = cv2.flip(image, 1)
+        aug_images.append(flip)
+
+        # Xoay ±15 độ
+        for angle in [-15, 15]:
+            h, w = image.shape[:2]
+            M = cv2.getRotationMatrix2D((w // 2, h // 2), angle, 1.0) #tạo ra ma trận xoay
+            rotated = cv2.warpAffine(image, M, (w, h)) # áp dụng ma trận xoay vào ảnh
+            aug_images.append(rotated)
+
+        # Tăng/giảm độ sáng
+        for alpha in [0.6, 1.4]:
+            bright = cv2.convertScaleAbs(image, alpha=alpha, beta=0)
+            aug_images.append(bright)
+
+        # Thêm nhiễu Gaussian
+        noise = image.copy().astype(np.float32)
+        noise += np.random.normal(0, 10, image.shape).astype(np.float32)
+        noise = np.clip(noise, 0, 255).astype(np.uint8)
+        aug_images.append(noise)
+
+        return aug_images
+
     dataset_path = Path(dataset_folder)
     known_encodings, known_names = [], []
-    class_image_dict = {}  # Lưu encoding theo từng lớp
+    class_image_dict = {}
 
     total_images, success_count, fail_count = 0, 0, 0
 
@@ -112,16 +135,24 @@ def build_face_dataset(dataset_folder="dataset", output_file="face_data.pkl", ba
                 if filename.lower().endswith(('.jpg', '.jpeg', '.png')):
                     path = os.path.join(person_dir, filename)
                     total_images += 1
-                    encoding = process_image(path)
+                    encoding, original_image = process_image(path)
                     if encoding is not None:
                         class_encodings.append(encoding)
                         success_count += 1
+
+                        # Tăng cường dữ liệu và trích xuất thêm encoding
+                        aug_images = augment_image(original_image)
+                        for aug_img in aug_images:
+                            face_locations = face_recognition.face_locations(aug_img)
+                            aug_encodings = face_recognition.face_encodings(aug_img, face_locations)
+                            if aug_encodings:
+                                class_encodings.append(aug_encodings[0])
                     else:
                         fail_count += 1
             if class_encodings:
                 class_image_dict[class_name] = class_encodings
 
-    # Cân bằng dữ liệu giữa các lớp bằng oversampling
+    # Cân bằng dữ liệu giữa các lớp nếu cần
     if balance_data:
         max_count = max(len(encs) for encs in class_image_dict.values())
         for class_name, encodings in class_image_dict.items():
@@ -139,11 +170,13 @@ def build_face_dataset(dataset_folder="dataset", output_file="face_data.pkl", ba
             known_encodings.extend(encodings)
             known_names.extend([class_name] * len(encodings))
 
+    # Lưu dữ liệu
     if known_encodings:
         with open(output_file, "wb") as f:
             pickle.dump({"encodings": known_encodings, "names": known_names}, f)
         print(f"✅ Đã lưu {len(known_encodings)} mẫu khuôn mặt vào '{output_file}'")
         print(f"📊 Tổng ảnh: {total_images} | Thành công: {success_count} | Lỗi: {fail_count}")
+        print("➕ Đã áp dụng tăng cường dữ liệu.")
         if balance_data:
             print("⚖️ Đã cân bằng dữ liệu giữa các lớp.")
     else:
