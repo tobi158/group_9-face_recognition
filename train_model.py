@@ -77,13 +77,13 @@ print(classification_report(y, y_pred, target_names=[label_map[i] for i in sorte
 f1 = f1_score(y, y_pred, average='macro')
 print(f"🎯 F1 Score (macro): {f1:.4f}")
 
-# Vẽ ma trận nhầm lẫn
-cm = confusion_matrix(y, y_pred)
-disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=[label_map[i] for i in sorted(label_map.keys())])
-disp.plot(cmap='Blues')
-plt.title("🔍 Confusion Matrix")
-plt.tight_layout()
-plt.show()
+# # Vẽ ma trận nhầm lẫn
+# cm = confusion_matrix(y, y_pred)
+# disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=[label_map[i] for i in sorted(label_map.keys())])
+# disp.plot(cmap='Blues')
+# plt.title("🔍 Confusion Matrix")
+# plt.tight_layout()
+# plt.show()
 
 
 # Binarize nhãn để dùng ROC (one-vs-rest)

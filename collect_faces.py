@@ -21,7 +21,7 @@ def collect_faces(person_name, save_dir="dataset", max_images=200):
         for (x, y, w, h) in faces:
             face = frame[y:y+h, x:x+w]
             face = cv2.resize(face, (160, 160))
-            file_path = os.path.join(person_path, f"{count}.jpg")
+            file_path = os.path.join(person_path, f"{person_name}_{count}.jpg")
             cv2.imwrite(file_path, face)
             count += 1
 
