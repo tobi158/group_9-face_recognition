@@ -8,7 +8,7 @@ import face_recognition
 import matplotlib.pyplot as plt
 
 # Đường dẫn
-EMBEDDING_FILE = "face_data_2.pkl"
+EMBEDDING_FILE = "face_data.pkl"
 TEST_DIR = r"C:\Users\BHXH\Desktop\venv_demo\dataset_split\test"
 COSINE_THRESHOLD = 0.6
 

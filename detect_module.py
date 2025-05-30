@@ -26,7 +26,7 @@ def process_image(image_path):
         return None
     return encodings[0]
 
-def build_face_dataset(dataset_folder=r"C:\Users\BHXH\Desktop\venv_demo\dataset_split\train", output_file="face_data_2.pkl"):
+def build_face_dataset(dataset_folder=r"C:\Users\BHXH\Desktop\venv_demo\dataset_split\train", output_file="face_data.pkl"):
     dataset_path = Path(dataset_folder)
     known_encodings, known_names = [], []
     total_images, success_count, fail_count = 0, 0, 0
