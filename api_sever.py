@@ -1,6 +1,7 @@
 from fastapi import FastAPI, File, UploadFile
 from fastapi.responses import JSONResponse
 import shutil
+from fastapi import Query
 import os
 from detect_module import build_face_dataset, detect_faces  # dùng từ mã gốc
 
@@ -12,6 +13,43 @@ OUTPUT_FOLDER = "output/faces"
 
 os.makedirs(DATASET_FOLDER, exist_ok=True)
 os.makedirs(OUTPUT_FOLDER, exist_ok=True)
+
+def detect_faces_in_folder(folder_path, model_path="face_data.pkl", display=False):
+    results = []
+
+    for subfolder_name in os.listdir(folder_path):
+        subfolder_path = os.path.join(folder_path, subfolder_name)
+
+        if not os.path.isdir(subfolder_path):
+            continue  # bỏ qua file, chỉ xử lý thư mục con
+
+        for filename in os.listdir(subfolder_path):
+            if filename.lower().endswith((".jpg", ".jpeg", ".png")):
+                file_path = os.path.join(subfolder_path, filename)
+                try:
+                    # Gọi hàm nhận diện khuôn mặt
+                    detect_faces(path=file_path, model_path=model_path, display=display)
+
+                    # Đọc metadata sau khi xử lý
+                    with open("output/metadata.json", "r", encoding="utf-8") as f:
+                        metadata = json.load(f)
+
+                    results.append({
+                        "class": subfolder_name,
+                        "file": filename,
+                        "detected_faces": metadata.get("total", 0),
+                        "faces": metadata.get("faces", [])
+                    })
+
+                except Exception as e:
+                    results.append({
+                        "class": subfolder_name,
+                        "file": filename,
+                        "error": str(e)
+                    })
+
+    return results
+
 
 # API khởi tạo dữ liệu khuôn mặt
 @app.post("/build_dataset/")
@@ -67,3 +105,12 @@ def delete_face():
     if delete:
         return {"message": f"Đã xóa lịch sử nhận diện"}
     return JSONResponse(status_code=404, content={"error": "không có file nào đã nhận diện."})
+from fastapi import Query
+
+@app.post("/api/detect_faces_from_folder/")
+def detect_faces_from_folder(folder: str = Query(..., description="Đường dẫn thư mục chứa ảnh test")):
+    if not os.path.exists(folder):
+        return JSONResponse(status_code=404, content={"error": "Thư mục không tồn tại."})
+    
+    result = detect_faces_in_folder(folder_path=folder, model_path=ENCODING_FILE)
+    return JSONResponse(content=result)
